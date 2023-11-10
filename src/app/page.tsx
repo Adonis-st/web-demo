@@ -1,113 +1,276 @@
-import Image from 'next/image'
+"use client";
 
-export default function Home() {
+import { patientList } from "@/data/patient";
+import { medicationList } from "@/data/medication";
+import { useState } from "react";
+import { Waste } from "./components/Waste";
+import { Keypad } from "./components/Keypad";
+
+const actionOptions = ["take", "return", "waste"];
+
+export default function HomePage() {
+
+  const [selectedPatient, setSelectedPatient] = useState(patientList?.[0].name);
+  const [selectMedication, setSelectMedication] = useState("");
+  const [currentScreen, setCurrentScreen] = useState("");
+  const [keypadInput, setKeypadInput] = useState("");
+
+  const [wasteSteps, setWasteSteps] = useState(1);
+
+  const [medication, setMedication] = useState([{
+    name: "Morphine",
+    concentration: "10mg/1ml",
+    take: "0",
+    return: "0",
+    waste: "0",
+    wasteUnit: "mg",
+  },
+  {
+    name: "Midazolam",
+    concentration: "2mg/2ml",
+    take: "0",
+    return: "0",
+    waste: "0",
+    wasteUnit: "mg",
+  },
+  {
+    name: "Ketamine",
+    concentration: "500mg/5ml",
+    take: "0",
+    return: "0",
+    waste: "0",
+    wasteUnit: "mg",
+  },
+  {
+    name: "Fentanyl",
+    concentration: "100mcg/2ml",
+    take: "0",
+    return: "0",
+    waste: "0",
+    wasteUnit: "mg",
+  },
+  {
+    name: "Propofol",
+    concentration: "200mg/20ml",
+    take: "0",
+    return: "0",
+    waste: "0",
+    wasteUnit: "mg",
+  },
+  {
+    name: "Propofol",
+    concentration: "200mg/20ml",
+    take: "0",
+    return: "0",
+    waste: "0",
+    wasteUnit: "mg",
+  }]);
+
+  const handlePatientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPatient(e.target.value);
+    setMedication(medicationList);
+  };
+
+  const handleNextCase = () => {
+
+
+    setSelectedPatient(patientList?.[1].name)
+    setMedication(medicationList);
+  
+    
+  };
+
+  const changeScreen = ({
+    chosenAction,
+    chosenMedication,
+  }: {
+    chosenAction: string;
+    chosenMedication: string;
+  }) => {
+    setSelectMedication(chosenMedication);
+    setCurrentScreen(chosenAction);
+  };
+
+  const updateMedicationAmount = () => {
+    const updatedMedication = [...medication];
+
+    const medicationToUpdate = updatedMedication.find(
+      (medication) => medication.name === selectMedication
+    );
+    if (currentScreen === "take") {
+      if (medicationToUpdate) {
+        medicationToUpdate.take = keypadInput;
+
+        setMedication(updatedMedication);
+      }
+    }
+
+    if (currentScreen === "return") {
+      if (medicationToUpdate) {
+        medicationToUpdate.return = keypadInput;
+
+        setMedication(updatedMedication);
+      }
+    }
+    setKeypadInput("");
+    setCurrentScreen("");
+  };
+
+  const resetValues = () => {
+    setWasteSteps(1);
+    setCurrentScreen("");
+    setKeypadInput("");
+  };
+
+  const saveWasteSteps = () => {
+    const updatedMedication = [...medication];
+    const medicationToUpdate = updatedMedication.find(
+      (medication) => medication.name === selectMedication
+    );
+
+    if (medicationToUpdate) {
+      medicationToUpdate.waste = keypadInput;
+
+      setMedication(updatedMedication);
+      setWasteSteps(3);
+    }
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <main className="mx-auto w-[93%] max-w-[400px] mt-5 lg:mt-7">
+      {!currentScreen && (
+        <>
+          <div className="flex justify-between mt-2 ">
+            <div className="text-3xl">🔒</div>
+            <div className="text-4xl">⚙</div>
+            <button onClick={() => handleNextCase()} className="btn">
+              Next Case
+            </button>
+          </div>
+          <div className="mt-3">
+            <select
+              value={selectedPatient}
+              onChange={handlePatientChange}
+              className="bg-[#464949] text-white"
+            >
+              {patientList.map((patient, index) => (
+                <option
+                  key={index}
+                  value={patient.name}
+                >{`${patient.name}, ${patient.dateOfBirth}`}</option>
+              ))}
+            </select>
+          </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+          <div className="flex justify-between items-center mt-3 ">
+            <div className="w-[110px] border px-2 border-black text-[14px] h-[63px] rounded-[5px]">
+              <span className="block">Medication</span>Name and concentration
+            </div>
+
+            {actionOptions.map((action) => (
+              <div
+                key={action}
+                className="capitalize border border-black text-left p-2 text-[17px] h-[63px] w-[70px] rounded-[5px]"
+              >
+                {action}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3">
+            {medication.map((medication, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center mt-3"
+              >
+                <div className="border border-black rounded-[5px] p-2 text-left text-[15px] w-[110px] ">
+                  <div>{medication.name}</div>
+                  <div>{medication.concentration}</div>
+                </div>
+
+                <button
+                  onClick={() =>
+                    changeScreen({
+                      chosenAction: "take",
+                      chosenMedication: medication.name,
+                    })
+                  }
+                  className="border border-black rounded-[5px] text-[#464949]  h-[63px] w-[70px]"
+                >
+                  {`${medication.take} Vials`}
+                </button>
+                <button
+                  onClick={() =>
+                    changeScreen({
+                      chosenAction: "return",
+                      chosenMedication: medication.name,
+                    })
+                  }
+                  className="border border-black rounded-[5px] text-[#464949]  h-[63px] w-[70px]"
+                >
+                  {`${medication.return} Vials`}
+                </button>
+                <button
+                  onClick={() =>
+                    changeScreen({
+                      chosenAction: "waste",
+                      chosenMedication: medication.name,
+                    })
+                  }
+                  className="border border-black rounded-[5px] text-[#464949]  h-[63px] w-[70px]"
+                >
+                  {`${medication.waste} ${medication.wasteUnit}`}
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {currentScreen === "take" && (
+        <>
+          <div className="flex justify-between mt-2">
+            <button className="btn" onClick={resetValues}>
+              Cancel
+            </button>
+            <button className="btn" onClick={() => updateMedicationAmount()}>
+              Save
+            </button>
+          </div>
+          <h2 className="text-2xl text-center">Quantity to Take</h2>
+
+          <Keypad keypadInput={keypadInput} setKeypadInput={setKeypadInput} />
+        </>
+      )}
+
+      {currentScreen === "return" && (
+        <>
+          <div className="flex justify-between">
+            <button className="btn" onClick={resetValues}>
+              Cancel
+            </button>
+            <button className="btn" onClick={() => updateMedicationAmount()}>
+              Save
+            </button>
+          </div>
+          <h2 className="text-2xl text-center">Quantity to Return</h2>
+
+          <Keypad keypadInput={keypadInput} setKeypadInput={setKeypadInput} />
+        </>
+      )}
+
+      {currentScreen === "waste" && (
+        <Waste
+          wasteSteps={wasteSteps}
+          setCurrentScreen={setCurrentScreen}
+          keypadInput={keypadInput}
+          setWasteSteps={setWasteSteps}
+          resetValues={resetValues}
+          saveWasteSteps={saveWasteSteps}
+          setKeypadInput={setKeypadInput}
+          setSelectMedication={setSelectMedication}
         />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      )}
     </main>
-  )
+  );
 }
